@@ -1,3 +1,5 @@
+import React, {useState} from 'react';
+
 // Initial packing items
 const initialItems = [
   { id: 1, description: "Shirt", quantity: 5, packed: false },
@@ -9,19 +11,50 @@ function Logo() {
 }
 
 function Form() {
+  const [description, setDescription] = useState('');
+  const [quantity, setQuantity] = useState(0);
+  function handleSubmit(e) {
+    e.preventDefault();
+    setDescription('');
+  }
   return (
-    <form className="add-form">
+    <form className="add-form" onSubmit={handleSubmit}>
       <h3>What do you need to pack?</h3>
+
+      <select value={quantity} onChange={(e) => setQuantity(e.target.value)}>
+        <option value='1'>1</option>
+        <option value='2'>2</option>
+        <option value='3'>3</option>
+      </select>
+
+      <input type='text' value={description} onChange={(e) => setDescription(e.target.value)} placeholder='Item...' />
+
+      <button>Add</button>
     </form>
   );
 }
 
-function PackingList() {
+function Item({item, togglePacked}) {
+  return <li
+    onClick={() => togglePacked(item.id)}
+    style={{textDecoration: item.packed ? 'line-through' : 'none', cursor : 'pointer'}}
+    >
+      {item.quantity} {item.description}
+  </li>
+}
+
+function PackingList({items, setItems}) {
+  function togglePacked(id) {
+    setItems(items.map(item =>
+      item.id === id ? { ...item, packed: !item.packed } : item
+    ));
+  }
+
   return (
     <div className="list">
       <ul>
-        {initialItems.map((item) => (
-          <li>{item.description}</li>
+        {items.map((item) => (
+          <Item item={item} key={item.id} togglePacked={togglePacked} />
         ))}
       </ul>
     </div>
@@ -37,11 +70,13 @@ function Stats() {
 }
 
 function App() {
+  const [items, setItems] = useState(initialItems);
+
   return (
     <div className="app">
       <Logo />
       <Form />
-      <PackingList />
+      <PackingList items={items} setItems={setItems}/>
       <Stats />
     </div>
   );
